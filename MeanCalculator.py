@@ -1,5 +1,7 @@
 import os
 import re
+import PySimpleGUI as sg
+
 
 examsList = os.listdir(".")
 pattern = re.compile(r"\((\d+)\)")
@@ -8,6 +10,10 @@ def meanCalculate(examsList, ignoredExam = ""):
 
   credictSum = 0
   examsDict= {}
+
+  if len(examsList) == 0:
+    return 0
+
   for exam in examsList:
     examSplit = exam.split(" ")
 
@@ -54,9 +60,20 @@ def meanClearer(examsList):
       higherMean = meanCleared
 
 
-  print("The most penalizing exam is", examToCut, "with a mean without it:", higherMean)
+  print("The most penalizing exam is", examToCut, "with a mean without it:", round(higherMean,3))
+
+  return examToCut, higherMean
 
 
-print("Mean: ", totalMean)
+print("Mean: ", round(totalMean,3))
 
-meanClearer(examsList)
+examToCut, higherMean = meanClearer(examsList)
+
+meanString = "Mean: " + str(round(totalMean, 3))
+meanCutString = "The most penalizing exam is " + examToCut + " with a mean without it: " + str(round(higherMean,3))
+
+layout = [[sg.Text(meanString)],
+          [sg.Text(meanCutString)]]
+
+# Create the window
+window = sg.Window("Mean calculator", layout).read()
