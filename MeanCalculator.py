@@ -2,7 +2,6 @@ import os
 import re
 import PySimpleGUI as sg
 
-
 examsList = os.listdir(".")
 pattern = re.compile(r"\((\d+)\)")
 
