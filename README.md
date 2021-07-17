@@ -5,3 +5,5 @@ To make this script work, simply create a folder in which all the exams passed a
 exam (vote) (credits)
 
 Without one of the 3 parameters the script will go to the next line, this is because some exams have no grade.
+
+By downloading the executable you can run it simply by clicking on the file. Or you can download the python file to modify it or add features.
