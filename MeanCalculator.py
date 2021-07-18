@@ -2,7 +2,7 @@ import os
 import re
 import PySimpleGUI as sg
 
-examsList = os.listdir(".")
+
 pattern = re.compile(r"\((\d+)\)")
 
 def meanCalculate(examsList, ignoredExam = ""):
@@ -31,10 +31,7 @@ def meanCalculate(examsList, ignoredExam = ""):
   return sum(examsDict.values()) / credictSum
 
 
-totalMean = meanCalculate(examsList)
-
-
-def meanClearer(examsList):
+def meanClearer(examsList, totalMean):
 
   filteredList = []
   for exam in examsList:
@@ -59,20 +56,54 @@ def meanClearer(examsList):
       higherMean = meanCleared
 
 
-  print("The most penalizing exam is", examToCut, "with a mean without it:", round(higherMean,3))
+  #print("The most penalizing exam is", examToCut, "with a mean without it:", round(higherMean,3))
 
-  return examToCut, higherMean
+  return examToCut, round(higherMean,3)
 
 
-print("Mean: ", round(totalMean,3))
+def calculate(examsList, type):
 
-examToCut, higherMean = meanClearer(examsList)
+  totalMean = round(meanCalculate(examsList),3)
 
-meanString = "Mean: " + str(round(totalMean, 3))
-meanCutString = "The most penalizing exam is " + examToCut + " with a mean without it: " + str(round(higherMean,3))
+  examToCut, higherMean = meanClearer(examsList, totalMean)
 
-layout = [[sg.Text(meanString)],
-          [sg.Text(meanCutString)]]
+  meanString = "Mean: " + str(totalMean)
+  meanCutString = "The most penalizing exam is " + examToCut + " with a mean without it: " + str(higherMean)
 
-# Create the window
-window = sg.Window("Mean calculator", layout).read()
+  layout2 = [[sg.Text(meanString)],
+             [sg.Text(meanCutString)],
+             [sg.Button('Exit')]]
+                
+  windowResult = sg.Window('Mean calculator: {type} input', layout2)
+
+  while True:
+    event, values = windowResult.read()
+
+    if event == sg.WIN_CLOSED or event == 'Exit': # if user closes window or clicks exit
+        break
+
+  windowResult.close()
+
+# Main 
+
+layout = [[sg.Text('Which input type do you choose?')],
+          [sg.Button('File'), sg.Button('Directory'), sg.Button('Exit')] ]
+
+window = sg.Window("Mean calculator", layout)
+
+while True:
+    event, values = window.read()
+
+    if event == sg.WIN_CLOSED or event == 'Exit': # if user closes window or clicks exit
+        break
+
+    elif event == 'File':
+      examsList = open("grades.txt", "r").read().split('\n')
+      calculate(examsList, 'file')
+
+    elif event == 'Directory':
+      examsList = os.listdir(".") 
+      calculate(examsList, 'directory')
+      
+window.close()
+
