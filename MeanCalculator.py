@@ -61,7 +61,7 @@ def meanClearer(examsList, totalMean):
   return examToCut, round(higherMean,3)
 
 
-def calculate(examsList, type):
+def calculate(examsList, inputType):
 
   totalMean = round(meanCalculate(examsList),3)
 
@@ -70,40 +70,68 @@ def calculate(examsList, type):
   meanString = "Mean: " + str(totalMean)
   meanCutString = "The most penalizing exam is " + examToCut + " with a mean without it: " + str(higherMean)
 
+  sg.theme('DarkAmber')
   layout2 = [[sg.Text(meanString)],
              [sg.Text(meanCutString)],
-             [sg.Button('Exit')]]
+             [sg.Button('Back')]]
                 
-  windowResult = sg.Window('Mean calculator: {type} input', layout2)
+  titleString = 'Mean calculator: ' +  inputType + ' input'
+  windowResult = sg.Window(titleString, layout2)
 
   while True:
     event, values = windowResult.read()
 
-    if event == sg.WIN_CLOSED or event == 'Exit': # if user closes window or clicks exit
+    if event == sg.WIN_CLOSED or event == 'Back': # if user closes window or clicks exit
         break
 
   windowResult.close()
 
+
+def meanCalculator():
+  sg.theme('DarkAmber')
+  layout = [[sg.Text('Which input type do you choose?')],
+            [sg.Button('File'), sg.Button('Directory'), sg.Button('Back')] ]
+
+  window = sg.Window("Mean calculator", layout, size=(400,300))
+
+  while True:
+      event, values = window.read()
+
+      if event == sg.WIN_CLOSED or event == 'Back': # if user closes window or clicks exit
+          break
+
+      elif event == 'File':
+        examsList = open("grades.txt", "r").read().split('\n')
+        calculate(examsList, 'file')
+
+      elif event == 'Directory':
+        examsList = os.listdir(".") 
+        calculate(examsList, 'directory')
+        
+  window.close()
+
+
+
 # Main 
+sg.theme('DarkAmber')
+mainLayout = [[sg.Text('Mean Calculator', font=15, justification='center')],
+              [sg.Text('Choose what u want to do')],
+              [],
+              [sg.Button('Mean calculate'), sg.Button('Rating to be taken'), sg.Button('Exit')]]
 
-layout = [[sg.Text('Which input type do you choose?')],
-          [sg.Button('File'), sg.Button('Directory'), sg.Button('Exit')] ]
-
-window = sg.Window("Mean calculator", layout)
+mainWindow = sg.Window("Mean Calculator", mainLayout, size=(400,300), grab_anywhere=True)
 
 while True:
-    event, values = window.read()
+  event, values = mainWindow.read()
 
-    if event == sg.WIN_CLOSED or event == 'Exit': # if user closes window or clicks exit
-        break
+  if event == sg.WIN_CLOSED or event == 'Exit': # if user closes window or clicks exit
+    break
 
-    elif event == 'File':
-      examsList = open("grades.txt", "r").read().split('\n')
-      calculate(examsList, 'file')
+  elif event == 'Mean calculate':
+    meanCalculator()
 
-    elif event == 'Directory':
-      examsList = os.listdir(".") 
-      calculate(examsList, 'directory')
-      
-window.close()
+  elif event == 'Rating to be taken':
+    meanCalculator()
+
+mainWindow.close()
 
