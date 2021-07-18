@@ -4,7 +4,7 @@ This is a small python script to calculate the weighted university average on cr
 To make this script work, simply create a folder in which all the exams passed are present like directories in the format:
 exam (vote) (credits)
 
-Input type can also be choosed by file (.txt) in the format:
+Input type can also be choosed by file (grades.txt) in the format:
 exam1 (vote1) (credits1)
 exam2 (vote2) (credits2)
 .
