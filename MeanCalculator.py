@@ -2,7 +2,6 @@ import os
 import re
 import PySimpleGUI as sg
 
-
 pattern = re.compile(r"\((\d+)\)")
 
 def meanCalculate(examsList, ignoredExam = ""):
@@ -23,13 +22,18 @@ def meanCalculate(examsList, ignoredExam = ""):
       if exam == ignoredExam:
         continue
 
+    if examSplit[1] == "30L":
+      examSplit[1] = "33"
+
     credictSum += int(pattern.findall(examSplit[2])[0])
 
     examsDict[examSplit[0]] = int(pattern.findall(examSplit[1])[0]) * int(pattern.findall(examSplit[2])[0])
 
   
-  return sum(examsDict.values()) / credictSum
+  return sum(examsDict.values()) / credictSum, credictSum
 
+
+# MEAN CLEAR
 
 def meanClearer(examsList, totalMean):
 
@@ -49,26 +53,26 @@ def meanClearer(examsList, totalMean):
 
   for item in filteredList:
 
-    meanCleared = meanCalculate(examsList, item)
+    meanCleared, totalCredits = meanCalculate(examsList, item)
 
     if meanCleared > higherMean:
       examToCut = item
       higherMean = meanCleared
 
 
-  #print("The most penalizing exam is", examToCut, "with a mean without it:", round(higherMean,3))
-
   return examToCut, round(higherMean,3)
 
 
-def calculate(examsList, inputType):
+def calculateMean(examsList, inputType):
 
-  totalMean = round(meanCalculate(examsList),3)
+  totalMean, totalCredits = meanCalculate(examsList)
+
+  totalMean = round(totalMean,3)
 
   examToCut, higherMean = meanClearer(examsList, totalMean)
 
-  meanString = "Mean: " + str(totalMean)
-  meanCutString = "The most penalizing exam is " + examToCut + " with a mean without it: " + str(higherMean)
+  meanString = "Mean: " + str(totalMean) + " equivalent to " + str(round(totalMean*110/30,3)) + "/110"
+  meanCutString = "The most penalizing exam is " + examToCut + " with a mean without it: " + str(higherMean)  + " equivalent to " + str(round(higherMean*110/30,3)) + "/110"
 
   sg.theme('DarkAmber')
   layout2 = [[sg.Text(meanString)],
@@ -86,6 +90,8 @@ def calculate(examsList, inputType):
 
   windowResult.close()
 
+  return higherMean, totalCredits
+
 
 def meanCalculator():
   sg.theme('DarkAmber')
@@ -102,13 +108,88 @@ def meanCalculator():
 
       elif event == 'File':
         examsList = open("grades.txt", "r").read().split('\n')
-        calculate(examsList, 'file')
+        totalMean, totalCredits = calculateMean(examsList, 'file')
+        break
 
       elif event == 'Directory':
         examsList = os.listdir(".") 
-        calculate(examsList, 'directory')
+        totalMean, totalCredits = calculateMean(examsList, 'directory')
+        break
         
   window.close()
+  return totalMean, totalCredits
+
+# RATING TO TAKE
+
+def ratingToTake(examsNumber, creditsList, finalMean, actualMean, totalCredits):
+  creditsToAdd = sum([int(i) for i in creditsList])
+  result = round((((totalCredits+creditsToAdd) * finalMean) - (actualMean*totalCredits)),3)
+  print(result)
+
+  
+
+def ratingToTakeCalculator():
+
+  sg.theme('DarkAmber')
+  layout = [[sg.Text('how many exams are you missing?\n (example: 3)')],
+            [sg.InputText()],
+            [sg.Text('How many credits these exams have?\n (n° credits for each exam, example: 12 6 9)')],
+            [sg.InputText()],
+            [sg.Text('Do you want to calculate your actual mean? \n (recommended choise if you don\'t know mean and credits)', key='-MEAN-')],
+            [sg.Button('Calculate', key='-CALCULATE-'), sg.Button('Manual', key='-MANUAL-')],
+            [sg.Text('what grades mean would you like to have?\n (final mean)')],
+            [sg.InputText()],
+            [sg.Button('Submit'), sg.Button('Back')] ]
+
+  ratingWindow = sg.Window("Rating to take calculator", layout, size=(400,400))
+
+  actualMean = 0
+  totalCredits = 0
+  while True:
+      event, values = ratingWindow.read()     
+      
+      if event == sg.WIN_CLOSED or event == 'Back': # if user closes window or clicks exit
+        break
+      
+      if event == '-CALCULATE-':
+        actualMean, totalCredits = meanCalculator()
+
+      if event == '-MANUAL-':
+        eventPopUp, valuesPopUp = sg.Window('Manual choice', [[sg.Text('Your actual mean?\n (if you don\'t know check the other page)')],[sg.InputText()], [sg.Text('Your total credits?')],[sg.InputText()], [sg.OK()] ]).read(close=True)
+        
+        if valuesPopUp[0] == '' or valuesPopUp[1] == '':
+          break
+        
+        actualMean = int(valuesPopUp[0])
+        totalCredits = int(valuesPopUp[1])
+
+
+      stringMean = "Mean: " + str(actualMean) + " Credits: " + str(totalCredits)
+      ratingWindow['-MEAN-'].update(stringMean)
+      ratingWindow['-CALCULATE-'].update(visible=False)
+      ratingWindow['-MANUAL-'].update(visible=False)
+
+      if event == 'Submit':
+        break
+        
+
+  if values[0] == '' or values[1] == '' or values[2] == '':
+    sg.popup('One or more field empty')
+    
+  else:
+    examsNumber = int(values[0])
+    creditsList = values[1].split(" ")
+    finalMean = float(values[2])
+
+    if len(creditsList) != examsNumber:
+      ratingWindow.refresh()
+    
+    if finalMean > 31:
+      finalMean=31
+
+    ratingToTake(examsNumber, creditsList, finalMean, actualMean, totalCredits)
+
+  ratingWindow.close()
 
 
 
@@ -131,7 +212,7 @@ while True:
     meanCalculator()
 
   elif event == 'Rating to be taken':
-    meanCalculator()
+    ratingToTakeCalculator()
 
 mainWindow.close()
 
