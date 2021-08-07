@@ -93,7 +93,7 @@ def calculateMean(examsList, inputType):
   return higherMean, totalCredits
 
 
-def meanCalculator():
+def meanMenuInputType():
   sg.theme('DarkAmber')
   layout = [[sg.Text('Which input type do you choose?')],
             [sg.Button('File'), sg.Button('Directory'), sg.Button('Back')] ]
@@ -121,19 +121,44 @@ def meanCalculator():
 
 # RATING TO TAKE
 
-def ratingToTake(examsNumber, creditsList, finalMean, actualMean, totalCredits):
-  creditsToAdd = sum([int(i) for i in creditsList])
-  result = round((((totalCredits+creditsToAdd) * finalMean) - (actualMean*totalCredits)),3)
-  print(result)
+def ratingToTake(examsNumber, creditsNumber, finalMean, actualMean, totalCredits):
+  meanXcredits = actualMean*totalCredits
+  creditsSum = totalCredits + creditsNumber
 
+  result = (((creditsSum) * finalMean) - (meanXcredits))
+
+
+  resultOnCredits = round(result/creditsNumber,3)
+
+  meanXcredits += result
   
+  if result < 33 and result > 18:
+    meanString = "Grade to take: " + str(resultOnCredits) + " with a final mean of " + str(finalMean) + " equivalent to: " + str(round((meanXcredits/creditsSum)*110/30,3)) + "/110" 
+  else:
+    meanString = "You will never have a mean of" + str(finalMean) + ", I'm sorry bro"
+
+  sg.theme('DarkAmber')
+  layout = [[sg.Text(meanString)],
+             [sg.Button('Back')]]
+                
+  titleString = 'Rating to be taken'
+  windowResult = sg.Window(titleString, layout)
+
+  while True:
+    event, values = windowResult.read()
+
+    if event == sg.WIN_CLOSED or event == 'Back':
+        break
+
+  windowResult.close()
+
 
 def ratingToTakeCalculator():
 
   sg.theme('DarkAmber')
   layout = [[sg.Text('how many exams are you missing?\n (example: 3)')],
             [sg.InputText()],
-            [sg.Text('How many credits these exams have?\n (n° credits for each exam, example: 12 6 9)')],
+            [sg.Text('How many credits these exams have?\n (n° total credits example: 30)')],
             [sg.InputText()],
             [sg.Text('Do you want to calculate your actual mean? \n (recommended choise if you don\'t know mean and credits)', key='-MEAN-')],
             [sg.Button('Calculate', key='-CALCULATE-'), sg.Button('Manual', key='-MANUAL-')],
@@ -152,7 +177,7 @@ def ratingToTakeCalculator():
         break
       
       if event == '-CALCULATE-':
-        actualMean, totalCredits = meanCalculator()
+        actualMean, totalCredits = meanMenuInputType()
 
       if event == '-MANUAL-':
         eventPopUp, valuesPopUp = sg.Window('Manual choice', [[sg.Text('Your actual mean?\n (if you don\'t know check the other page)')],[sg.InputText()], [sg.Text('Your total credits?')],[sg.InputText()], [sg.OK()] ]).read(close=True)
@@ -164,7 +189,7 @@ def ratingToTakeCalculator():
         totalCredits = int(valuesPopUp[1])
 
 
-      stringMean = "Mean: " + str(actualMean) + " Credits: " + str(totalCredits)
+      stringMean = "Mean: " + str(actualMean) +  " equivalent to " + str(round(actualMean*110/30,3)) + "/110" + " Credits: " + str(totalCredits)
       ratingWindow['-MEAN-'].update(stringMean)
       ratingWindow['-CALCULATE-'].update(visible=False)
       ratingWindow['-MANUAL-'].update(visible=False)
@@ -178,16 +203,14 @@ def ratingToTakeCalculator():
     
   else:
     examsNumber = int(values[0])
-    creditsList = values[1].split(" ")
+    creditsNumber = int(values[1])
     finalMean = float(values[2])
 
-    if len(creditsList) != examsNumber:
-      ratingWindow.refresh()
     
     if finalMean > 31:
       finalMean=31
 
-    ratingToTake(examsNumber, creditsList, finalMean, actualMean, totalCredits)
+    ratingToTake(examsNumber, creditsNumber, finalMean, actualMean, totalCredits)
 
   ratingWindow.close()
 
@@ -209,7 +232,7 @@ while True:
     break
 
   elif event == 'Mean calculate':
-    meanCalculator()
+    meanMenuInputType()
 
   elif event == 'Rating to be taken':
     ratingToTakeCalculator()
