@@ -185,7 +185,7 @@ def ratingToTakeCalculator():
         if valuesPopUp[0] == '' or valuesPopUp[1] == '':
           break
         
-        actualMean = int(valuesPopUp[0])
+        actualMean = float(valuesPopUp[0])
         totalCredits = int(valuesPopUp[1])
 
 
