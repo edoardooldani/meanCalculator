@@ -132,10 +132,10 @@ def ratingToTake(examsNumber, creditsNumber, finalMean, actualMean, totalCredits
 
   meanXcredits += result
   
-  if result < 33 and result > 18:
-    meanString = "Grade to take: " + str(resultOnCredits) + " with a final mean of " + str(finalMean) + " equivalent to: " + str(round((meanXcredits/creditsSum)*110/30,3)) + "/110" 
-  else:
-    meanString = "You will never have a mean of" + str(finalMean) + ", I'm sorry bro"
+  #if result < 33 and result > 18:
+  meanString = "Grade to take: " + str(resultOnCredits) + " with a final mean of " + str(finalMean) + " equivalent to: " + str(round((meanXcredits/creditsSum)*110/30,3)) + "/110" 
+  #else:
+   # meanString = "You will never have a mean of" + str(finalMean) + ", I'm sorry bro"
 
   sg.theme('DarkAmber')
   layout = [[sg.Text(meanString)],
